@@ -2,13 +2,13 @@
 
 
 
-## 1. 简介
+## 简介
 
 vector底层是一个**动态数组**，包含三个迭代器，`start`和`finish`之间是已经被使用的空间范围，`start`与`end_of_storage`是整块连续空间，包括已经分配但是没有使用的空间。
 
 
 
-## 2. 基本操作
+## 基本操作
 
 ```c++
 vector<int> v;
@@ -23,6 +23,8 @@ bool v.empty(); // 判断vector中是否没有元素
 
 unsigned int v.size(); // 返回v中元素的个数，时间复杂度为O(1)
 unsigned int v.capacity(); // 返回已经分配的内存最多可以容纳元素的个数，时间复杂度为O(1)
+v.resize(int n, element); // 将v中的元素个数变为n，并用element填满所有位置
+v.reserve(int n) // 给vector预留大小为$n$的空间，但是多出来的空间不会存放任何东西
 
 v.push_back(x); // 在vector的最后加入一个元素
 v.pop_back(x); // 删除vector的最后一个元素
@@ -31,9 +33,8 @@ v.insert(it, x); // 在迭代器所在位置插入一个元素，原来在该位
 v.erase(v.begin()+1, v.end()-3); // 删除指定区间的元素，时间复杂度为O(N)
 v.erase(it); // 删除迭代器位置的元素，时间复杂度为O(N)
 
-// 将vector的容量扩容至n，即把v.capacity()变为n。若n小于原来的容量，则容量保持不变
-// 可以在一定程度上解决push_back()需要多次申请、释放空间和拷贝数据的问题
-v.reserve(n); 
+Vector<int>::iterator it1 = v.begin()+1, it2 = v.end()-2;
+vector<int> v1(it1, it2); // 新建一个内容为其他向量的一部分的向量
 
 v.clear(); // 删除vector中所有的数据，但是不释放内存空间
 v.shrink_to_fit()； // 请求容器降低其capacity和size匹配。
@@ -42,7 +43,17 @@ v.shrink_to_fit()； // 请求容器降低其capacity和size匹配。
 
 
 
-## 3. 内存增长机制
+## resize()与reserve()，size()与capacity()的区别
+
+- `resize(int n, element)`：将vector的size变为$n$，并用$element$填满所有位置
+- `reserve(int n)`：给vector预留大小为$n$的空间，但是多出来的空间不会存放任何东西，用`size()`函数查询其大小的话结果不变，可以在一定程度上解决push_back()需要多次申请、释放空间和拷贝数据的问题。若n小于原来的容量，则容量保持不变。
+- `size()`：vector中存在的元素的个数
+- `capacity()`：vector中预留空间的大小，即不申请新的空间的情况下，最多可以容纳元素的个数
+- `size()`与`resize()`对应，`capacity()`与`reserve()`对应
+
+
+
+## 内存增长机制
 
 vector的内存增长机制：vector初始只分配1个单位的空间，当分配的空间占满时，会自动在申请当前容量1.5倍或2倍的新的内存空间，然后把原来的数据拷贝至新的空间并释放原来的空间。这其中共经过了（1）申请新的内存空间（2）拷贝元素和（3）释放原来的空间 3个步骤。***为什么扩容倍数为1.5倍或2倍？***
 
@@ -82,7 +93,11 @@ size: 513 capacity: 1024
 
 
 
-## 4. vector的拷贝
+
+
+
+
+## vector的拷贝
 
 `=`只会拷贝`begin()`到`end`的部分，不会拷贝`finish`到`end_of_storage`的部分；
 
@@ -90,7 +105,7 @@ size: 513 capacity: 1024
 
 
 
-## 5. 二维及多维的vector
+## 二维及多维的vector
 
 对于`vector<vector<int>> v2`，v2的第一维的每个元素都是`vector<int>`型的指针。二维vector的第二维也可以是`set`、`map`等其它类型的容器。
 
@@ -111,7 +126,13 @@ for(int i = 0; i < v2.size(); i++) {
 
 
 
-## 6. 使用技巧
+## 用vector模拟栈
+
+可以用`v.push_back()`，`v.pop_back()`，`v.back()`模拟栈，优点是可以用`v.back() += 1`类似的操作直接对栈顶元素进行修改。
+
+
+
+## 使用技巧
 
 1. vector初始化的多种方法：
 
